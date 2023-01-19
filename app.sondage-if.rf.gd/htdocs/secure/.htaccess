@@ -1,0 +1,17 @@
+Deny from all
+
+# BEGIN InfinityFree Directory Protection
+# DO NOT EDIT - YOUR CHANGES WILL BE OVERWRITTEN
+AuthType Basic
+AuthName "Login Required"
+AuthUserFile "/home/vol7_1/epizy.com/epiz_33410250/htdocs/secure/.htpasswd"
+Require valid-user
+# END InfinityFree Directory Protection
+
+# BEGIN InfinityFree Directory Protection
+# DO NOT EDIT - YOUR CHANGES WILL BE OVERWRITTEN
+AuthType Basic
+AuthName "Login Required"
+AuthUserFile "/home/vol7_1/epizy.com/epiz_33410250/htdocs/secure/.htpasswd"
+Require valid-user
+# END InfinityFree Directory Protection
