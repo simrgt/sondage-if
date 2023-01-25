@@ -35,7 +35,7 @@
             <input class="inputText" type="email" id="email" name="email" placeholder="Insérez votre email"
               required><br>
           </div>
-          <p><input type="checkbox" name="choix" required> J'accepte les <a href="../api/templates/pages/CGU.html" target="_blank"
+          <p><input type="checkbox" name="choix" required> J'accepte les <a href="{{ url_for('template', filename='CGU.html') }}" target="_blank"
                                                                             rel="noopener noreferrer">conditions d'utilisation</a> du sondage.</p>
 
           <button id="valider" type="submit">Valider</button>
