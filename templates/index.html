@@ -8,7 +8,7 @@
   <title>Index</title>
 
 
-  <link rel="stylesheet" href="templates/style/index.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
 <body>
@@ -20,7 +20,7 @@
   <div class="main">
     <div class="form">
       <div class="imglogo">
-        <img id="logo" src="images/LogoInterComm.png" alt="LogoInterComm" />
+        <img id="logo" src="{{ url_for('static', filename='images/LogoInterComm.png') }}" alt="LogoInterComm" />
       </div>
       <div class="contentForm">
         <form method="post" action="" enctype="multipart/form-data">
@@ -35,8 +35,8 @@
             <input class="inputText" type="email" id="email" name="email" placeholder="Insérez votre email"
               required><br>
           </div>
-          <p><input type="checkbox" name="choix" required> J'accepte les <a href="pages/CGU.html" target="_blank"
-              rel="noopener noreferrer">conditions d'utilisation</a> du sondage.</p>
+          <p><input type="checkbox" name="choix" required> J'accepte les <a href="../api/templates/pages/CGU.html" target="_blank"
+                                                                            rel="noopener noreferrer">conditions d'utilisation</a> du sondage.</p>
 
           <button id="valider" type="submit">Valider</button>
         </form>
