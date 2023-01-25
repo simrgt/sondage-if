@@ -8,4 +8,4 @@ app.config["DEBUG"] = True
 
 @app.route("/")
 def index():
-    return render_template("main_page.html")
+    return render_template("index.html")
