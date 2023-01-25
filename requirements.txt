@@ -1,1 +1,2 @@
+MySQL-python==1.2.5
 flask_mysqldb==0.2.0
