@@ -1,2 +1,2 @@
-PyMySQL==1.0.2 
+mysql-connector-python==8.0.32
 Flask-MySQLdb==1.0.1
