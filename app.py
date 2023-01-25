@@ -28,3 +28,7 @@ def index():
     # # Closing the cursor
     # cursor.close()
     return render_template("index.html")
+
+@app.route('/', subdomain ='app')
+def practice():
+    return "salut"
