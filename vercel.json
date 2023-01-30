@@ -10,7 +10,5 @@
         "src": "/(.*)",
         "dest": "app.py"
       }
-    ],
-    "cleanUrls": true,
-    "alias": ["sondage-if.vercel.app"]
+    ]
   }
