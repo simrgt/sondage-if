@@ -23,16 +23,16 @@ def index():
 @app.route("/inscription/", methods=['GET', 'POST'])
 def inscription() :
     if request.method == "POST":
-        nom = request.form.get("nom")
-        prenom = request.form.get("prenom")
-        mail = request.form.get("mail")
+        nom = str(request.form.get("nom")).capitalize()
+        prenom = str(request.form.get("prenom")).capitalize()
+        mail = str(request.form.get("email")).capitalize()
         db = mysql.connector.connect(**configDB)
         c= db.cursor()
 
-        c.execute(f"SELECT nom, prenom, mail FROM Personne WHERE nom='{nom}' AND prenom={prenom} AND mail={mail}")
+        c.execute(f"SELECT nom, prenom, mail FROM Personne WHERE nom='{nom}' AND prenom='{prenom}' AND mail='{mail}'")
         myresult = c.fetchall()
         db.close()
-        if myresult is None:
+        if myresult == []:
             return redirect(url_for('sondage'))
         else :
             return render_template("index.html", error=error)
