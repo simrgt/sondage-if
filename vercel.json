@@ -12,5 +12,5 @@
       }
     ],
     "cleanUrls": true,
-    "alias": ["sondage-if.vercel.app", "app.sondage-if.vercel.app"]
+    "alias": ["sondage-if.vercel.app"]
   }
