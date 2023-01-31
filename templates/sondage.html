@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Sondage</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js">
     </script>
 
@@ -10,39 +13,114 @@
     </script>
 
     <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"
-        rel="stylesheet" type="text/css" />
+          rel="stylesheet" type="text/css"/>
 </head>
 <body>
 <form method="post" action="" enctype="multipart/form-data">
     <div class="inputs">
-      <label>Âge</label>
-      <input class="inputText" type="number" id="age" name="age" required placeholder="Insérez votre âge"><br>
+        <label>Âge (10-18 ans)</label>
+        <input class="inputText" type="number" id="age" name="age" required placeholder="Insérez votre âge" min="10"
+               max="18"><br>
     </div>
     <div class="inputs">
-      <label>Ville</label>
-      <input class="inputText" type="text" id="ville" name="ville" placeholder="Insérez votre prénom"
-        required><br>
+        <label>Ville</label>
+        <input class="inputText" type="text" id="ville" name="ville" placeholder="Insérez votre prénom"
+               required><br>
     </div>
     <div class="inputs">
+        <label>Niveau Scolaire</label>
         <select id="statutscolaire" required>
             {% for niveau in niveaux %}
-              <option value="{{ niveau[0] }}">{{ niveau[0] }}</option>
+                <option value="{{ niveau[0] }}">{{ niveau[0] }}</option>
             {% endfor %}
         </select>
     </div>
-  </form>
+    <div>
+        <input type="checkbox" id="RMatin" name="RMatin" checked>
+        <label for="RMatin">Repas du matin</label>
+    </div>
+    <div class="cache">
+        <div class="inputs">
+            <select id="CategorieDaliment">
+                {for i in categories}
+                <option value="valeur1">{i}</option>
+                {endif}
+            </select>
+        </div>
+
+        <div class="inputs">
+            <select id="SousCategorieDaliment">
+                <option value="valeur1">Valeur 1</option>
+                <option value="valeur2" selected>Valeur 2</option>
+                <option value="valeur3">Valeur 3</option>
+            </select>
+        </div>
+
+        <div class="inputs">
+            <select id="SousSousCategorieDaliment">
+                <option value="valeur1">Valeur 1</option>
+                <option value="valeur2" selected>Valeur 2</option>
+                <option value="valeur3">Valeur 3</option>
+            </select>
+        </div>
+
+        <div class="inputs">
+            <label>Nom de l'aliment</label>
+            <input class="inputText" type="text" id="aliment" name="aliment"
+                   placeholder="Insérez le nom de l'aliment">
+        </div>
+
+    </div>
+
+    <div>
+        <input type="checkbox" id="RSoir" name="RSoir" checked>
+        <label for="RSoir">Repas du soir</label>
+    </div>
+
+    <div class="cache2">
+        <div class="inputs">
+            <select id="CategorieDaliment">
+                <option value="valeur1">Valeur 1</option>
+                <option value="valeur2" selected>Valeur 2</option>
+                <option value="valeur3">Valeur 3</option>
+            </select>
+        </div>
+        <div class="inputs">
+            <select id="SousCategorieDaliment">
+                <option value="valeur1">Valeur 1</option>
+                <option value="valeur2" selected>Valeur 2</option>
+                <option value="valeur3">Valeur 3</option>
+            </select>
+        </div>
+        <div class="inputs">
+            <select id="SousSousCategorieDaliment">
+                <option value="valeur1">Valeur 1</option>
+                <option value="valeur2" selected>Valeur 2</option>
+                <option value="valeur3">Valeur 3</option>
+            </select>
+        </div>
+        <div class="inputs">
+            <label>Nom de l'aliment</label>
+            <input class="inputText" type="text" id="aliment" name="aliment"
+                   placeholder="Insérez le nom de l'aliment">
+
+
+        </div>
+    </div>
+</form>
 
 <script>
-  $( function() {
-    var availableTags = [
-        {% for ville in villes %}
-            "{{ville}}",
-        {% endfor %}
-    ];
-    $( "#ville" ).autocomplete({
-      source: availableTags
+    $(function () {
+        var availableTags = [
+            {% for ville in villes %}
+                "{{ville}}",
+            {% endfor %}
+        ];
+        $("#ville").autocomplete({
+            source: availableTags
+        });
     });
-  } );
-  </script>
+</script>
+<script type="text/javascript" src="{{ url_for('static', filename='script/script.js') }}"></script>
 </body>
 </html>
