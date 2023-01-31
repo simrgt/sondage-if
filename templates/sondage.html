@@ -36,29 +36,12 @@
         <label for="RMatin">Repas du matin</label>
     </div>
     <div class="cache">
-        <div class="inputs">
-            <select id="CategorieDaliment">
-                {for i in categories}
-                <option value="valeur1">{i}</option>
-                {endif}
-            </select>
-        </div>
-
-        <div class="inputs">
-            <select id="SousCategorieDaliment">
-                <option value="valeur1">Valeur 1</option>
-                <option value="valeur2" selected>Valeur 2</option>
-                <option value="valeur3">Valeur 3</option>
-            </select>
-        </div>
-
-        <div class="inputs">
-            <select id="SousSousCategorieDaliment">
-                <option value="valeur1">Valeur 1</option>
-                <option value="valeur2" selected>Valeur 2</option>
-                <option value="valeur3">Valeur 3</option>
-            </select>
-        </div>
+        <form method="POST">
+            {{ form.crsf_token }}
+            {{ form.groupe }}
+            {{ form.sous_groupe }}
+            {{ form.sous_sous_groupe }}
+        </form>
 
         <div class="inputs">
             <label>Nom de l'aliment</label>
@@ -115,6 +98,48 @@
         $("#ville").autocomplete({
             source: availableTags
         });
+
+        let groupe_select = $("#groupe");
+        let sousGroupe_select = $("#sous_groupe");
+        let sousSousGroupe_select = $("#sous_sous_groupe");
+        groupe.onchange = function () {
+            changeSsGrp();
+        };
+        sous_groupe.onchange = function () {
+            console.log("oui");
+            changeSsSsGrp();
+        }
+        function changeSsGrp() {
+            groupe_val = groupe_select.val();
+            fetch('/api/sousGroupe/' + groupe_val).then(function (response) {
+                response.json().then(function (data) {
+                    let optionHTML = '';
+                    for (let sousGroupe of data.sousGroupe) {
+                        optionHTML += '<option value="' + sousGroupe.id + '">' + sousGroupe.name + '</option>';
+                    }
+                    sousGroupe_select[0].innerHTML = optionHTML;
+                    changeSsSsGrp();
+                });
+            });
+
+
+
+        }
+        function changeSsSsGrp() {
+            groupe_val = sousGroupe_select.val();
+            fetch('/api/sousSousGroupe/' + groupe_val).then(function (response) {
+                response.json().then(function (data) {
+                    console.table(data);
+                    let optionHTML = '';
+                    for (let sousGroupe of data.sousGroupe) {
+                        optionHTML += '<option value="' + sousGroupe.id + '">' + sousGroupe.name + '</option>';
+                    }
+                    sousSousGroupe_select[0].innerHTML = optionHTML;
+                });
+            });
+        }
+        changeSsGrp();
+        changeSsSsGrp();
     });
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='script/script.js') }}"></script>
