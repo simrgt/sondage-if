@@ -3,8 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js">
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js">
+    </script>
+
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css"
+        rel="stylesheet" type="text/css" />
 </head>
 <body>
+<form method="post" action="" enctype="multipart/form-data">
+    <div class="inputs">
+      <label>Âge</label>
+      <input class="inputText" type="number" id="age" name="age" required placeholder="Insérez votre âge"><br>
+    </div>
+    <div class="inputs">
+      <label>Ville</label>
+      <input class="inputText" type="text" id="ville" name="ville" placeholder="Insérez votre prénom"
+        required><br>
+    </div>
+    <div class="inputs">
+        <select id="statutscolaire" required>
+            {% for niveau in niveaux %}
+              <option value="{{ niveau[0] }}">{{ niveau[0] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+  </form>
 
+<script>
+  $( function() {
+    var availableTags = [
+        {% for ville in villes %}
+            "{{ville}}",
+        {% endfor %}
+    ];
+    $( "#ville" ).autocomplete({
+      source: availableTags
+    });
+  } );
+  </script>
 </body>
 </html>
