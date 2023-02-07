@@ -1,16 +1,19 @@
 
 # A very simple Flask Hello World app for you to get started with...
 
-from flask import Flask, render_template, request, redirect, url_for, jsonify
-from flask_wtf import FlaskForm
-from wtforms import SelectField
+import json
+
 import mysql.connector
 import requests
-import json
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask_wtf import FlaskForm
+from wtforms import SelectField
+from datetime import timedelta
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config["DEBUG"] = True
 app.config['SECRET_KEY']='key'
+app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(seconds=5)
 configDB = {
     'host':"bqpjqiutmrlk6tkmm9ef-mysql.services.clever-cloud.com",
     'user':"usfyvwadlczjc1jj",
@@ -20,6 +23,7 @@ configDB = {
 
 # mysql = MySQL(app)
 error = "Cette personne à déjà rempli ce sondage"
+error2 = "Session expirée"
 
 class Groupe(FlaskForm):
     db = mysql.connector.connect(**configDB)
@@ -52,9 +56,11 @@ def inscription() :
         myresult = c.fetchall()
         db.close()
         if myresult == []:
+            session.permanent = True
             return redirect(url_for('sondage'))
         else :
             return render_template("index.html", error=error)
+    return redirect(url_for('index'))
 
 @app.route("/CGU/")
 def CGU():
@@ -62,6 +68,8 @@ def CGU():
 
 @app.route("/sondage/", methods=["POST", "GET"])
 def sondage():
+    if session.permanent is False :
+        return render_template("index.html", error=error2)
     if request.method == "GET":
         uri = "https://geo.api.gouv.fr/communes"
         try:
@@ -80,7 +88,6 @@ def sondage():
         niveaux = c.fetchall()
         db.close()
         form=Groupe()
-
 
     return render_template("sondage.html", villes=villes, niveaux=niveaux, form=form)
 
