@@ -13,7 +13,7 @@ from datetime import timedelta
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config["DEBUG"] = True
 app.config['SECRET_KEY']='key'
-app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(seconds=5)
+app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=5)
 configDB = {
     'host':"bqpjqiutmrlk6tkmm9ef-mysql.services.clever-cloud.com",
     'user':"usfyvwadlczjc1jj",
@@ -39,27 +39,35 @@ class Groupe(FlaskForm):
 
 
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def index():
+    if request.method == "GET":
+        return render_template("index.html", error=session['error'])
     return render_template("index.html")
 
 @app.route("/inscription/", methods=['GET', 'POST'])
 def inscription() :
     if request.method == "POST":
-        nom = str(request.form.get("nom")).capitalize()
-        prenom = str(request.form.get("prenom")).capitalize()
-        mail = str(request.form.get("prenom"))
+        session['nom'] = str(request.form.get("nom")).capitalize()
+        session['prenom'] = str(request.form.get("prenom")).capitalize()
+        session['mail'] = str(request.form.get("email"))
+        print(session['nom'], session['prenom'], session['mail'])
         db = mysql.connector.connect(**configDB)
         c= db.cursor()
 
-        c.execute(f"SELECT nom, prenom, mail FROM Personne WHERE nom='{nom}' AND prenom='{prenom}' AND mail='{mail}'")
+        c.execute(f"SELECT nom, prenom, mail FROM Personne WHERE (nom='{session['nom']}' AND prenom='{session['prenom']}' AND mail='{session['mail']})') OR mail='{session['mail']}' ")
         myresult = c.fetchall()
         db.close()
         if myresult == []:
             session.permanent = True
             return redirect(url_for('sondage'))
         else :
-            return render_template("index.html", error=error)
+            session['error']=error
+            return redirect(url_for('index'))
+    else :
+        if session.permanent is False :
+            session['error']=error2
+            return redirect(url_for('index'))
     return redirect(url_for('index'))
 
 @app.route("/CGU/")
@@ -69,7 +77,7 @@ def CGU():
 @app.route("/sondage/", methods=["POST", "GET"])
 def sondage():
     if session.permanent is False :
-        return render_template("index.html", error=error2)
+        return redirect(url_for('inscription'))
     if request.method == "GET":
         uri = "https://geo.api.gouv.fr/communes"
         try:
@@ -88,7 +96,6 @@ def sondage():
         niveaux = c.fetchall()
         db.close()
         form=Groupe()
-
     return render_template("sondage.html", villes=villes, niveaux=niveaux, form=form)
 
 
@@ -122,4 +129,20 @@ def sousSousGroupe(sousGroupe):
         ssssGrp['name'] = sous_sous_groupe[1]
         sous_sous_groupesArray.append(ssssGrp)
 
-    return jsonify({'sousGroupe':sous_sous_groupesArray})
+    return jsonify({'sousSousGroupe':sous_sous_groupesArray})
+
+@app.route('/api/aliment/<sousSousGroupe>')
+def aliment(sousSousGroupe):
+    db = mysql.connector.connect(**configDB)
+    c = db.cursor()
+    c.execute(f"SELECT alim_code ,alim_nom_fr FROM Aliment WHERE alim_ssssgrp_code ={sousSousGroupe}")
+    sous_sous_groupes = c.fetchall()
+
+    sous_sous_groupesArray = []
+    for sous_sous_groupe in sous_sous_groupes:
+        ssssGrp = {}
+        ssssGrp['id'] = sous_sous_groupe[0]
+        ssssGrp['name'] = sous_sous_groupe[1]
+        sous_sous_groupesArray.append(ssssGrp)
+
+    return jsonify({'aliment':sous_sous_groupesArray})

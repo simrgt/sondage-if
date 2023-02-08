@@ -104,10 +104,11 @@
         let sousSousGroupe_select = $("#sous_sous_groupe");
         groupe.onchange = function () {
             changeSsGrp();
+            changeAliment();
         };
         sous_groupe.onchange = function () {
-            console.log("oui");
             changeSsSsGrp();
+            changeAliment();
         }
         function changeSsGrp() {
             groupe_val = groupe_select.val();
@@ -129,17 +130,33 @@
             groupe_val = sousGroupe_select.val();
             fetch('/api/sousSousGroupe/' + groupe_val).then(function (response) {
                 response.json().then(function (data) {
-                    console.table(data);
                     let optionHTML = '';
-                    for (let sousGroupe of data.sousGroupe) {
+                    for (let sousGroupe of data.sousSousGroupe) {
                         optionHTML += '<option value="' + sousGroupe.id + '">' + sousGroupe.name + '</option>';
                     }
                     sousSousGroupe_select[0].innerHTML = optionHTML;
                 });
             });
         }
+        function changeAliment() {
+            var availableTags = [];
+            groupe_val = sousSousGroupe_select.val();
+            fetch('/api/aliment/' + groupe_val).then(function (response) {
+                response.json().then(function (data) {
+                    for (let aliment of data.aliment) {
+                        availableTags.push(aliment.name);
+                    }
+                });
+            });
+            console.log(availableTags);
+            $("#aliment").autocomplete({
+                source: availableTags
+            });
+        }
+
         changeSsGrp();
         changeSsSsGrp();
+        changeAliment();
     });
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='script/script.js') }}"></script>
