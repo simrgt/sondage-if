@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Sondage</title>
-    <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 </head>
 <body>
 <form method="post" action="" enctype="multipart/form-data">
@@ -41,6 +41,7 @@
             {{ form.groupe }}
             {{ form.sous_groupe }}
             {{ form.sous_sous_groupe }}
+            {{ form.aliment }}
         </form>
 
         <div class="inputs">
@@ -102,12 +103,15 @@
         let groupe_select = $("#groupe");
         let sousGroupe_select = $("#sous_groupe");
         let sousSousGroupe_select = $("#sous_sous_groupe");
+        let aliment_select = $("#aliment");
         groupe.onchange = function () {
             changeSsGrp();
+            changeAliment2();
             changeAliment();
         };
         sous_groupe.onchange = function () {
             changeSsSsGrp();
+            changeAliment2();
             changeAliment();
         }
         function changeSsGrp() {
@@ -131,11 +135,31 @@
             fetch('/api/sousSousGroupe/' + groupe_val).then(function (response) {
                 response.json().then(function (data) {
                     let optionHTML = '';
+                    if (data.sousSousGroupe.length <= 1) {
+                        sousSousGroupe_select.hide();
+                    }
                     for (let sousGroupe of data.sousSousGroupe) {
                         optionHTML += '<option value="' + sousGroupe.id + '">' + sousGroupe.name + '</option>';
                     }
                     sousSousGroupe_select[0].innerHTML = optionHTML;
+                    changeAliment2();
                 });
+            });
+        }
+        function changeAliment2() {
+            var availableTags = [];
+            groupe_val = sousSousGroupe_select.val();
+            fetch('/api/aliment/' + groupe_val).then(function (response) {
+                response.json().then(function (data) {
+                    let optionHTML = '';
+                    for (let aliment of data.aliment) {
+                        optionHTML += '<option value="' + aliment.id + '">' + aliment.name + '</option>';
+                    }
+                    aliment_select[0].innerHTML = optionHTML;
+                });
+            });
+            $("#aliment").autocomplete({
+                source: availableTags
             });
         }
         function changeAliment() {
@@ -148,7 +172,6 @@
                     }
                 });
             });
-            console.log(availableTags);
             $("#aliment").autocomplete({
                 source: availableTags
             });
@@ -156,7 +179,7 @@
 
         changeSsGrp();
         changeSsSsGrp();
-        changeAliment();
+        changeAliment2();
     });
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='script/script.js') }}"></script>

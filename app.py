@@ -1,6 +1,3 @@
-
-# A very simple Flask Hello World app for you to get started with...
-
 import json
 
 import mysql.connector
@@ -13,7 +10,11 @@ from datetime import timedelta
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config["DEBUG"] = True
 app.config['SECRET_KEY']='key'
-app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=5)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+
 configDB = {
     'host':"bqpjqiutmrlk6tkmm9ef-mysql.services.clever-cloud.com",
     'user':"usfyvwadlczjc1jj",
@@ -34,6 +35,8 @@ class Groupe(FlaskForm):
     sous_groupe = SelectField('sousGroupe', choices=c.fetchall())
     c.execute(f"SELECT alim_ssssgrp_code, alim_ssssgrp_nom_fr FROM SousSousGroupeAliment")
     sous_sous_groupe = SelectField('sousSousGroupe', choices=c.fetchall())
+    c.execute(f"SELECT alim_code, alim_nom_fr FROM Aliment")
+    aliment = SelectField('aliment', choices=c.fetchall())
     db.close()
 
 
@@ -41,7 +44,7 @@ class Groupe(FlaskForm):
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
-    if request.method == "GET":
+    if session.get('error') is not None :
         return render_template("index.html", error=session['error'])
     return render_template("index.html")
 
