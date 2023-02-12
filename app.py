@@ -59,7 +59,10 @@ def index():
     if session.get('error') is not None :
         return render_template("index.html", error=session['error'])
     if session.get('sondage') is not None :
-        return render_template("index.html", error=session['sondage'])
+        message = session['sondage']
+        session.clear()
+        return render_template("index.html", error=message)
+
     return render_template("index.html")
 
 @app.route("/inscription", methods=['POST'])
@@ -194,6 +197,9 @@ def validate_sondage_form(form):
                 form_matin.append(form.get(f"aliment_matin{i}"))
             else:
                 break
+        form.data['matin'] = form_matin
+    else:
+        form.data['matin'] = [None,None,None,None,None]
     if form.get('RSoir') == 'on':
         form_soir = []
         for i in range(5):
@@ -201,9 +207,12 @@ def validate_sondage_form(form):
                 form_soir.append(form.get(f"aliment_soir{i}"))
             else :
                 break
+        form.data['soir'] = form_soir
+    else:
+        form.data['soir'] = [None,None,None,None,None]
 
-    form.data['matin'] = form_matin
-    form.data['soir'] = form_soir
+
+    print(form.data['matin'])
     print(len(form.errors))
     return len(form.errors) == 0
 
@@ -226,5 +235,4 @@ def verifierSondage():
 def validerSondage():
     #ajouter les données dans la base de données
     session['sondage']="Merci d'avoir rempli le sondage, celui-ci a bien été enregistré"
-    session.clear()
     return redirect(url_for('index'))
