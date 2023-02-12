@@ -10,86 +10,84 @@
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sondage.css') }}">
 </head>
 <body>
-<form method="post" action="" enctype="multipart/form-data">
-    <div class="inputs">
-        <label>Âge (10-18 ans)</label>
-        <input class="inputText" type="number" id="age" name="age" required placeholder="Insérez votre âge" min="10"
-               max="18"><br>
+<div class="main">
+  <div class="form">
+    <div class="imglogo">
+          <img id="logo" src="{{ url_for('static', filename='images/LogoInterComm.png') }}" alt="LogoInterComm" />
     </div>
-    <div class="inputs">
-        <label>Ville</label>
-        <input class="inputText" type="text" id="ville" name="ville" placeholder="Insérez votre prénom"
-               required><br>
-    </div>
-    <div class="inputs">
-        <label>Niveau Scolaire</label>
-        <select id="statutscolaire" required>
-            {% for niveau in niveaux %}
-                <option value="{{ niveau[0] }}">{{ niveau[0] }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div>
-        <input type="checkbox" id="RMatin" name="RMatin" checked>
-        <label for="RMatin">Repas du matin</label>
-    </div>
-    <div class="cache">
-        <form method="POST">
-            {{ form.crsf_token }}
-            {{ form.groupe }}
-            {{ form.sous_groupe }}
-            {{ form.sous_sous_groupe }}
-            {{ form.aliment }}
-        </form>
-
+    <form method="post" action="" enctype="multipart/form-data">
         <div class="inputs">
-            <label>Nom de l'aliment</label>
-            <input class="inputText" type="text" id="aliment" name="aliment"
-                   placeholder="Insérez le nom de l'aliment">
+            <label>Âge (10-18 ans)</label>
+            <input class="inputText" type="number" id="age" name="age" required placeholder="Insérez votre âge" min="10"
+                   max="18"><br>
         </div>
-
-    </div>
-
-    <div>
-        <input type="checkbox" id="RSoir" name="RSoir" checked>
-        <label for="RSoir">Repas du soir</label>
-    </div>
-
-    <div class="cache2">
         <div class="inputs">
-            <select id="CategorieDaliment">
-                <option value="valeur1">Valeur 1</option>
-                <option value="valeur2" selected>Valeur 2</option>
-                <option value="valeur3">Valeur 3</option>
+            <label>Ville</label>
+            <input class="inputText" type="text" id="ville" name="ville" placeholder="Insérez votre prénom"
+                   required><br>
+        </div>
+        <div class="inputs">
+            <label>Niveau Scolaire</label>
+            <select id="statutscolaire" required>
+                {% for niveau in niveaux %}
+                    <option value="{{ niveau[0] }}">{{ niveau[0] }}</option>
+                {% endfor %}
             </select>
         </div>
-        <div class="inputs">
-            <select id="SousCategorieDaliment">
-                <option value="valeur1">Valeur 1</option>
-                <option value="valeur2" selected>Valeur 2</option>
-                <option value="valeur3">Valeur 3</option>
-            </select>
-        </div>
-        <div class="inputs">
-            <select id="SousSousCategorieDaliment">
-                <option value="valeur1">Valeur 1</option>
-                <option value="valeur2" selected>Valeur 2</option>
-                <option value="valeur3">Valeur 3</option>
-            </select>
-        </div>
-        <div class="inputs">
-            <label>Nom de l'aliment</label>
-            <input class="inputText" type="text" id="aliment" name="aliment"
-                   placeholder="Insérez le nom de l'aliment">
+        <div class="aliment">
+            <div>
+                <input type="checkbox" id="RMatin" name="RMatin" checked>
+                <label for="RMatin">Repas du matin</label>
+            </div>
+            <div class="cache">
+                {% for form in formMatin %}
+                    <div>
+                    {{ form.crsf_token }}
+                    {{ form.groupe }}
+                    {{ form.sous_groupe }}
+                    {{ form.sous_sous_groupe }}
+                    {{ form.aliment }}
+                    </div>
+                {% endfor %}
 
+                {#<div class="inputs">
+                    <label>Nom de l'aliment</label>
+                    <input class="inputText" type="text" id="aliment" name="aliment"
+                           placeholder="Insérez le nom de l'aliment">
+                </div>#}
 
+            </div>
         </div>
-    </div>
-</form>
+
+        <div class="aliment">
+            <div>
+                <input type="checkbox" id="RSoir" name="RSoir" checked>
+                <label for="RSoir">Repas du soir</label>
+            </div>
+
+            <div class="cache2">
+                 {% for form in formSoir %}
+                     <div>
+                    {{ form.crsf_token }}
+                    {{ form.groupe }}
+                    {{ form.sous_groupe }}
+                    {{ form.sous_sous_groupe }}
+                    {{ form.aliment }}
+                     </div>
+                {% endfor %}
+            </div>
+        </div>
+    </form>
+  </div>
+</div>
 
 <script>
+    let ssGrp= {};
+    let ssSsGrp = {};
+    let aliments = {};
     $(function () {
         var availableTags = [
             {% for ville in villes %}
@@ -100,86 +98,117 @@
             source: availableTags
         });
 
-        let groupe_select = $("#groupe");
-        let sousGroupe_select = $("#sous_groupe");
-        let sousSousGroupe_select = $("#sous_sous_groupe");
-        let aliment_select = $("#aliment");
-        groupe.onchange = function () {
-            changeSsGrp();
-            changeAliment2();
-            changeAliment();
-        };
-        sous_groupe.onchange = function () {
-            changeSsSsGrp();
-            changeAliment2();
-            changeAliment();
-        }
-        function changeSsGrp() {
-            groupe_val = groupe_select.val();
-            fetch('/api/sousGroupe/' + groupe_val).then(function (response) {
-                response.json().then(function (data) {
-                    let optionHTML = '';
-                    for (let sousGroupe of data.sousGroupe) {
-                        optionHTML += '<option value="' + sousGroupe.id + '">' + sousGroupe.name + '</option>';
-                    }
-                    sousGroupe_select[0].innerHTML = optionHTML;
-                    changeSsSsGrp();
+        let soir_div_select = $(".cache2 > div, .cache > div");
+        let groupe_select = soir_div_select.find("select[name='groupe']");
+        //console.log(groupe_select);
+        let sousGroupe_select = soir_div_select.find("select[name='sous_groupe']");
+        let sousSousGroupe_select = soir_div_select.find("select[name='sous_sous_groupe']");
+        //let aliment_select = $("#aliment");
+        groupe_select.each( function () {
+            this.onchange = function () {
+                changeSsGrp(this);
+            };
+        });
+        sousGroupe_select.each( function () {
+            this.onchange = function () {
+                changeSsSsGrp(this);
+            };
+        });
+        sousSousGroupe_select.each( function () {
+            this.onchange = function () {
+                changeAliment2(this);
+            };
+        });
+        function changeSsGrp(parent) {
+            let sousGroupe = parent.parentElement.children.sous_groupe;
+            let groupe_val = parent.value;
+            if (groupe_val in ssGrp) {
+                let optionHTML = '';
+                for (let sousGroupe of ssGrp[groupe_val]) {
+                    optionHTML += '<option value="' + sousGroupe.id + '">' + sousGroupe.name + '</option>';
+                }
+                sousGroupe.innerHTML = optionHTML;
+                changeSsSsGrp(sousGroupe);
+            } else {
+                fetch('/api/sousGroupe/' + groupe_val).then(function (response) {
+                    response.json().then(function (data) {
+                        ssGrp[groupe_val] = data.sousGroupe;
+                        let optionHTML = '';
+                        for (let sousGroupe of data.sousGroupe) {
+                            optionHTML += '<option value="' + sousGroupe.id + '">' + sousGroupe.name + '</option>';
+                        }
+                        sousGroupe.innerHTML = optionHTML;
+                        changeSsSsGrp(sousGroupe);
+                    });
                 });
-            });
+            }
 
 
 
         }
-        function changeSsSsGrp() {
-            groupe_val = sousGroupe_select.val();
-            fetch('/api/sousSousGroupe/' + groupe_val).then(function (response) {
-                response.json().then(function (data) {
-                    let optionHTML = '';
-                    if (data.sousSousGroupe.length <= 1) {
-                        sousSousGroupe_select.hide();
-                    }
-                    for (let sousGroupe of data.sousSousGroupe) {
-                        optionHTML += '<option value="' + sousGroupe.id + '">' + sousGroupe.name + '</option>';
-                    }
-                    sousSousGroupe_select[0].innerHTML = optionHTML;
-                    changeAliment2();
+        function changeSsSsGrp(parent) {
+            let sousSousGroupe = parent.parentElement.children.sous_sous_groupe;
+            console.log(sousSousGroupe);
+            let groupe_val = parent.value;
+            if (groupe_val in ssSsGrp) {
+                if (ssSsGrp[groupe_val].length <= 1) {
+                    sousSousGroupe.style.display = "none";
+                } else {
+                    sousSousGroupe.style.display = "";
+                }
+                let optionHTML = '';
+                for (let sousSousGroupe of ssSsGrp[groupe_val]) {
+                    optionHTML += '<option value="' + sousSousGroupe.id + '">' + sousSousGroupe.name + '</option>';
+                }
+                sousSousGroupe.innerHTML = optionHTML;
+                changeAliment2(sousSousGroupe);
+            } else {
+                fetch('/api/sousSousGroupe/' + groupe_val).then(function (response) {
+                    response.json().then(function (data) {
+                        ssSsGrp[groupe_val] = data.sousSousGroupe;
+                        if (data.sousSousGroupe.length <= 1) {
+                            sousSousGroupe.style.display = "none";
+                        } else {
+                            sousSousGroupe.style.display = "";
+                        }
+                        let optionHTML = '';
+                        for (let sousSousGroupe of data.sousSousGroupe) {
+                            optionHTML += '<option value="' + sousSousGroupe.id + '">' + sousSousGroupe.name + '</option>';
+                        }
+                        sousSousGroupe.innerHTML = optionHTML;
+                        changeAliment2(sousSousGroupe);
+                    });
                 });
-            });
-        }
-        function changeAliment2() {
-            var availableTags = [];
-            groupe_val = sousSousGroupe_select.val();
-            fetch('/api/aliment/' + groupe_val).then(function (response) {
-                response.json().then(function (data) {
-                    let optionHTML = '';
-                    for (let aliment of data.aliment) {
-                        optionHTML += '<option value="' + aliment.id + '">' + aliment.name + '</option>';
-                    }
-                    aliment_select[0].innerHTML = optionHTML;
-                });
-            });
-            $("#aliment").autocomplete({
-                source: availableTags
-            });
-        }
-        function changeAliment() {
-            var availableTags = [];
-            groupe_val = sousSousGroupe_select.val();
-            fetch('/api/aliment/' + groupe_val).then(function (response) {
-                response.json().then(function (data) {
-                    for (let aliment of data.aliment) {
-                        availableTags.push(aliment.name);
-                    }
-                });
-            });
-            $("#aliment").autocomplete({
-                source: availableTags
-            });
+            }
         }
 
-        changeSsGrp();
-        changeSsSsGrp();
-        changeAliment2();
+        async function changeAliment2(parent) {
+            let aliment = parent.parentElement.children.aliment;
+            let groupe_val = parent.value;
+            if (groupe_val in aliments) {
+                let optionHTML = '';
+                for (let aliment of aliments[groupe_val]) {
+                    optionHTML += '<option value="' + aliment.id + '">' + aliment.name + '</option>';
+                }
+                aliment.innerHTML = optionHTML;
+                return;
+            } else {
+                await fetch('/api/aliment/' + groupe_val).then(async function (response) {
+                    await response.json().then(function (data) {
+                        aliments[groupe_val] = data.aliment;
+                        let optionHTML = '';
+                        for (let aliment of data.aliment) {
+                            optionHTML += '<option value="' + aliment.id + '">' + aliment.name + '</option>';
+                        }
+                        aliment.innerHTML = optionHTML;
+                    });
+                });
+            }
+        }
+
+        groupe_select.each(function () {
+            changeSsGrp(this);
+        });
     });
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='script/script.js') }}"></script>

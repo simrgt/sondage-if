@@ -22,22 +22,30 @@ configDB = {
     'database':"bqpjqiutmrlk6tkmm9ef"
 }
 
+connection_pool = mysql.connector.pooling.MySQLConnectionPool(pool_name="mypool", pool_size=5, **configDB)
+
 # mysql = MySQL(app)
 error = "Cette personne à déjà rempli ce sondage"
 error2 = "Session expirée"
 
+def doSql(sql):
+    try :
+        db = connection_pool.get_connection()
+        c = db.cursor()
+        c.execute(sql)
+        result = c.fetchall()
+        c.close()
+        db.commit()
+        db.close()
+    except mysql.connector.Error as e:
+        return doSql(sql)
+    return result
+
 class Groupe(FlaskForm):
-    db = mysql.connector.connect(**configDB)
-    c = db.cursor()
-    c.execute(f"SELECT alim_grp_code ,alim_grp_nom_fr FROM GroupeAliment")
-    groupe = SelectField('groupe', choices=c.fetchall())
-    c.execute(f"SELECT alim_ssgrp_code, alim_ssgrp_nom_fr FROM SousGroupeAliment")
-    sous_groupe = SelectField('sousGroupe', choices=c.fetchall())
-    c.execute(f"SELECT alim_ssssgrp_code, alim_ssssgrp_nom_fr FROM SousSousGroupeAliment")
-    sous_sous_groupe = SelectField('sousSousGroupe', choices=c.fetchall())
-    c.execute(f"SELECT alim_code, alim_nom_fr FROM Aliment")
-    aliment = SelectField('aliment', choices=c.fetchall())
-    db.close()
+    groupe = SelectField('groupe', choices=doSql(f"SELECT alim_grp_code ,alim_grp_nom_fr FROM GroupeAliment"))
+    sous_groupe = SelectField('sousGroupe')
+    sous_sous_groupe = SelectField('sousSousGroupe')
+    aliment = SelectField('aliment')
 
 
 
@@ -48,19 +56,14 @@ def index():
         return render_template("index.html", error=session['error'])
     return render_template("index.html")
 
-@app.route("/inscription/", methods=['GET', 'POST'])
+@app.route("/inscription", methods=['GET', 'POST'])
 def inscription() :
     if request.method == "POST":
         session['nom'] = str(request.form.get("nom")).capitalize()
         session['prenom'] = str(request.form.get("prenom")).capitalize()
         session['mail'] = str(request.form.get("email"))
         print(session['nom'], session['prenom'], session['mail'])
-        db = mysql.connector.connect(**configDB)
-        c= db.cursor()
-
-        c.execute(f"SELECT nom, prenom, mail FROM Personne WHERE (nom='{session['nom']}' AND prenom='{session['prenom']}' AND mail='{session['mail']})') OR mail='{session['mail']}' ")
-        myresult = c.fetchall()
-        db.close()
+        myresult = doSql(f"SELECT nom, prenom, mail FROM Personne WHERE (nom='{session['nom']}' AND prenom='{session['prenom']}' AND mail='{session['mail']})') OR mail='{session['mail']}' ")
         if myresult == []:
             session.permanent = True
             return redirect(url_for('sondage'))
@@ -73,11 +76,11 @@ def inscription() :
             return redirect(url_for('index'))
     return redirect(url_for('index'))
 
-@app.route("/CGU/")
+@app.route("/CGU")
 def CGU():
     return render_template("CGU.html")
 
-@app.route("/sondage/", methods=["POST", "GET"])
+@app.route("/sondage", methods=["POST", "GET"])
 def sondage():
     if session.permanent is False :
         return redirect(url_for('inscription'))
@@ -92,23 +95,19 @@ def sondage():
         villes = []
         for i in data:
             villes.append(i['nom'])
-        db = mysql.connector.connect(**configDB)
-        c = db.cursor()
-
-        c.execute(f"SELECT NiveauScolaire FROM StatutScolaire")
-        niveaux = c.fetchall()
-        db.close()
-        form=Groupe()
-    return render_template("sondage.html", villes=villes, niveaux=niveaux, form=form)
+        niveaux = doSql(f"SELECT NiveauScolaire FROM StatutScolaire")
+        formMatin=[]
+        formSoir=[]
+        for i in range(5):
+            formMatin.append(Groupe())
+            formSoir.append(Groupe())
+        return render_template("sondage.html", villes=villes, niveaux=niveaux, formMatin=formMatin, formSoir=formSoir)
+    return redirect(url_for('inscription'))
 
 
 @app.route('/api/sousGroupe/<groupe>')
 def sousGroupe(groupe):
-    db = mysql.connector.connect(**configDB)
-    c = db.cursor()
-    c.execute(f"SELECT alim_ssgrp_code ,alim_ssgrp_nom_fr FROM SousGroupeAliment WHERE idGroupeAliment ={groupe}")
-    sous_groupes = c.fetchall()
-
+    sous_groupes = doSql(f"SELECT alim_ssgrp_code ,alim_ssgrp_nom_fr FROM SousGroupeAliment WHERE idGroupeAliment ={groupe}")
     sous_groupesArray = []
     for sous_groupe in sous_groupes:
         ssGrp = {}
@@ -120,10 +119,7 @@ def sousGroupe(groupe):
 
 @app.route('/api/sousSousGroupe/<sousGroupe>')
 def sousSousGroupe(sousGroupe):
-    db = mysql.connector.connect(**configDB)
-    c = db.cursor()
-    c.execute(f"SELECT alim_ssssgrp_code ,alim_ssssgrp_nom_fr FROM SousSousGroupeAliment WHERE alim_ssgrp_code ={sousGroupe}")
-    sous_sous_groupes = c.fetchall()
+    sous_sous_groupes = doSql(f"SELECT alim_ssssgrp_code ,alim_ssssgrp_nom_fr FROM SousSousGroupeAliment WHERE alim_ssgrp_code ={sousGroupe}")
 
     sous_sous_groupesArray = []
     for sous_sous_groupe in sous_sous_groupes:
@@ -136,10 +132,7 @@ def sousSousGroupe(sousGroupe):
 
 @app.route('/api/aliment/<sousSousGroupe>')
 def aliment(sousSousGroupe):
-    db = mysql.connector.connect(**configDB)
-    c = db.cursor()
-    c.execute(f"SELECT alim_code ,alim_nom_fr FROM Aliment WHERE alim_ssssgrp_code ={sousSousGroupe}")
-    sous_sous_groupes = c.fetchall()
+    sous_sous_groupes = doSql(f"SELECT alim_code ,alim_nom_fr FROM Aliment WHERE alim_ssssgrp_code ={sousSousGroupe}")
 
     sous_sous_groupesArray = []
     for sous_sous_groupe in sous_sous_groupes:
@@ -149,3 +142,5 @@ def aliment(sousSousGroupe):
         sous_sous_groupesArray.append(ssssGrp)
 
     return jsonify({'aliment':sous_sous_groupesArray})
+
+
