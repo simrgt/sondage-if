@@ -22,13 +22,13 @@ configDB = {
     'database':"bqpjqiutmrlk6tkmm9ef"
 }
 
-connection_pool = mysql.connector.pooling.MySQLConnectionPool(pool_name="mypool", pool_size=5, **configDB)
 
 # mysql = MySQL(app)
 error = "Cette personne à déjà rempli ce sondage"
 error2 = "Session expirée"
 
 def doSql(sql):
+    connection_pool = mysql.connector.pooling.MySQLConnectionPool(pool_name="mypool", pool_size=1, **configDB)
     try :
         db = connection_pool.get_connection()
         c = db.cursor()
@@ -132,6 +132,7 @@ def sousSousGroupe(sousGroupe):
 
 @app.route('/api/aliment/<sousSousGroupe>')
 def aliment(sousSousGroupe):
+
     sous_sous_groupes = doSql(f"SELECT alim_code ,alim_nom_fr FROM Aliment WHERE alim_ssssgrp_code ={sousSousGroupe}")
 
     sous_sous_groupesArray = []
