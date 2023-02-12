@@ -42,21 +42,27 @@ def doSql(sql):
     return result
 
 class Groupe(FlaskForm):
-    groupe = SelectField('groupe', choices=doSql(f"SELECT alim_grp_code ,alim_grp_nom_fr FROM GroupeAliment"))
+    groupe = SelectField('groupe', choices=[('Non Selectionné','Non Selectionné')] + doSql(f"SELECT alim_grp_code ,alim_grp_nom_fr FROM GroupeAliment"))
     sous_groupe = SelectField('sousGroupe')
     sous_sous_groupe = SelectField('sousSousGroupe')
     aliment = SelectField('aliment')
 
-
-
+    def personnaliser(self,s,i):
+        self.groupe.name = "groupe_" + str(s) + str(i)
+        self.sous_groupe.name = "sous_groupe_" + str(s) + str(i)
+        self.sous_sous_groupe.name = "sous_groupe_" + str(s) + str(i)
+        self.aliment.name = "aliment_" + str(s) + str(i)
+        return self
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
     if session.get('error') is not None :
         return render_template("index.html", error=session['error'])
+    if session.get('sondage') is not None :
+        return render_template("index.html", error=session['sondage'])
     return render_template("index.html")
 
-@app.route("/inscription", methods=['GET', 'POST'])
+@app.route("/inscription", methods=['POST'])
 def inscription() :
     if request.method == "POST":
         session['nom'] = str(request.form.get("nom")).capitalize()
@@ -84,7 +90,7 @@ def CGU():
 def sondage():
     if session.permanent is False :
         return redirect(url_for('inscription'))
-    if request.method == "GET":
+    if request.method == "GET" or request.method == "POST":
         uri = "https://geo.api.gouv.fr/communes"
         try:
             uResponse = requests.get(uri)
@@ -99,9 +105,12 @@ def sondage():
         formMatin=[]
         formSoir=[]
         for i in range(5):
-            formMatin.append(Groupe())
-            formSoir.append(Groupe())
-        return render_template("sondage.html", villes=villes, niveaux=niveaux, formMatin=formMatin, formSoir=formSoir)
+            formMatin.append(Groupe().personnaliser("matin",i))
+            formSoir.append(Groupe().personnaliser("soir",i))
+        if request.args.get("values") != None:
+            return render_template("sondage.html", villes=villes, niveaux=niveaux, formMatin=formMatin, formSoir=formSoir, values=request.args.get("values"))
+        else:
+            return render_template("sondage.html", villes=villes, niveaux=niveaux, formMatin=formMatin, formSoir=formSoir, values=None)
     return redirect(url_for('inscription'))
 
 
@@ -145,3 +154,77 @@ def aliment(sousSousGroupe):
     return jsonify({'aliment':sous_sous_groupesArray})
 
 
+def validate_sondage_form(form):
+    form.data={}
+    form.errors={}
+    form_age = form.get('age')
+    if form_age is None:
+        form.errors['age'] = "Vous devez renseigner votre age"
+    else:
+        form.data['age'] = form_age
+
+    form_ville = form.get('ville').capitalize()
+    uri = "https://geo.api.gouv.fr/communes"
+    try:
+        uResponse = requests.get(uri)
+    except requests.ConnectionError:
+        return "Connection Error"
+    Jresponse = uResponse.text
+    data = json.loads(Jresponse)
+    villes = []
+    for i in data:
+        villes.append(i['nom'])
+    if form_ville not in villes:
+        form.errors['ville'] = "Vous devez renseigner une ville valide"
+    else:
+        form.data['ville'] = form_ville
+
+    for i in form.keys():
+        print(i, form.get(i))
+    form_niveau = form.get('statut')
+    if form_niveau is None:
+        form.errors['niveau'] = "Vous devez renseigner votre niveau scolaire"
+    else:
+        form.data['niveau'] = form_niveau
+
+    if form.get('RMatin') == 'on':
+        form_matin = []
+        for i in range(5):
+            if form.get(f"groupe_matin{i}") != "Non Selectionné":
+                form_matin.append(form.get(f"aliment_matin{i}"))
+            else:
+                break
+    if form.get('RSoir') == 'on':
+        form_soir = []
+        for i in range(5):
+            if form.get(f"groupe_soir{i}") != "Non Selectionné":
+                form_soir.append(form.get(f"aliment_soir{i}"))
+            else :
+                break
+
+    form.data['matin'] = form_matin
+    form.data['soir'] = form_soir
+    print(len(form.errors))
+    return len(form.errors) == 0
+
+
+@app.route('/sondage/verifier', methods=['POST'])
+def verifierSondage():
+    if session.permanent is False :
+        return redirect(url_for('inscription'))
+    if request.method == "POST":
+        if not validate_sondage_form(request.form):
+            return redirect(url_for('sondage', values=request.form))
+        session['ville']=request.form.data['ville']
+        session['age']=request.form.data['age']
+        session['niveau']=request.form.data['niveau']
+        session['matin']=request.form.data['matin']
+        session['soir']=request.form.data['soir']
+        return redirect(url_for('validerSondage'))
+
+@app.route('/sondage/valider', methods=['GET'])
+def validerSondage():
+    #ajouter les données dans la base de données
+    session['sondage']="Merci d'avoir rempli le sondage, celui-ci a bien été enregistré"
+    session.clear()
+    return redirect(url_for('index'))
