@@ -11,6 +11,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sondage.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js"></script>
+
 </head>
 <body>
 <div class="main">
@@ -20,19 +23,14 @@
     </div>
     <form method="post" action="{{ url_for("verifierSondage") }}" enctype="multipart/form-data">
         <div class="inputs">
-            <label>Âge (10-18 ans)</label>
-            <input class="inputText" type="number" id="age" name="age" required placeholder="Insérez votre âge" min="10"
-                   max="18"><br>
+            {{ form.crsf_token }}
+            {{ form.ages.label|safe }}
+            {{ form.ages(class_="inputText", placeholder="Insérez votre âge") }}
         </div>
-        {% if 'age' in values.errors %}
-        <p class="help has-background-warning">
-            {{ values.errors['age'] }}
-        </p>
-        {% endif %}
         <div class="inputs">
-            <label>Ville</label>
-            <input class="inputText" type="text" id="ville" name="ville" placeholder="Insérez votre prénom"
-                   required><br>
+            {{ form.crsf_token }}
+            {{ form.ville.label|safe }}
+            {{ form.ville(class_="inputText", placeholder="Insérez votre ville") }}
         </div>
         {% if 'ville' in values.errors %}
             <p class="help has-background-warning">
@@ -41,11 +39,7 @@
         {% endif %}
         <div class="inputs">
             <label>Niveau Scolaire</label>
-            <select id="statutscolaire" name="statut" required>
-                {% for niveau in niveaux %}
-                    <option value="{{ niveau[0] }}">{{ niveau[0] }}</option>
-                {% endfor %}
-            </select>
+            {{ niveaux }}
         </div>
         {% if 'statutscolaire' in values.errors %}
             <p class="help has-background-warning">
@@ -58,13 +52,13 @@
                 <label for="RMatin">Repas du matin</label>
             </div>
             <div class="cache">
-                {% for form in formMatin %}
+                {% for categorie in form.alimentsMatin %}
                     <div>
-                    {{ form.crsf_token }}
-                    {{ form.groupe }}
-                    {{ form.sous_groupe }}
-                    {{ form.sous_sous_groupe }}
-                    {{ form.aliment }}
+                    {{ categorie.crsf_token }}
+                    {{ categorie.groupe }}
+                    {{ categorie.sous_groupe }}
+                    {{ categorie.sous_sous_groupe }}
+                    {{ categorie.aliment }}
                     </div>
                 {% endfor %}
             </div>
@@ -77,14 +71,14 @@
             </div>
 
             <div class="cache2">
-                 {% for form in formSoir %}
-                     <div>
-                    {{ form.crsf_token }}
-                    {{ form.groupe }}
-                    {{ form.sous_groupe }}
-                    {{ form.sous_sous_groupe }}
-                    {{ form.aliment }}
-                     </div>
+                 {% for categorie in form.alimentsSoir %}
+                    <div>
+                    {{ categorie.crsf_token }}
+                    {{ categorie.groupe }}
+                    {{ categorie.sous_groupe }}
+                    {{ categorie.sous_sous_groupe }}
+                    {{ categorie.aliment }}
+                    </div>
                 {% endfor %}
             </div>
         </div>
@@ -94,16 +88,13 @@
 </div>
 
 <script>
-    $(function () {
-        var availableTags = [
-            {% for ville in villes %}
-                "{{ville}}",
-            {% endfor %}
-        ];
-        $("#ville").autocomplete({
-            source: availableTags
-        });
+    $(document).ready(function() {
+    $('#ville').select2({  // init Select2 on form's name field
+        placeholder: "{{ form.ville.label.text }}",
+        allowClear: true,
+        "width": "style"
     });
+});
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='script/script.js') }}"></script>
 </body>

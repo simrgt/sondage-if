@@ -1,11 +1,11 @@
 import json
+from datetime import timedelta
 
 import mysql.connector
 import requests
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_wtf import FlaskForm
-from wtforms import SelectField
-from datetime import timedelta
+from wtforms import SelectField, validators, StringField, IntegerField
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config["DEBUG"] = True
@@ -27,6 +27,18 @@ configDB = {
 error = "Cette personne à déjà rempli ce sondage"
 error2 = "Session expirée"
 
+def getVilles():
+    uri = "https://geo.api.gouv.fr/communes"
+    try:
+        uResponse = requests.get(uri)
+    except requests.ConnectionError:
+        return "Connection Error"
+    Jresponse = uResponse.text
+    data = json.loads(Jresponse)
+    villes = []
+    for i in data:
+        villes.append((i['nom'], i['nom']))
+    return villes
 def doSql(sql):
     connection_pool = mysql.connector.pooling.MySQLConnectionPool(pool_name="mypool", pool_size=1, **configDB)
     try :
@@ -38,14 +50,35 @@ def doSql(sql):
         db.commit()
         db.close()
     except mysql.connector.Error as e:
+        print("erreur : ", e)
         return doSql(sql)
     return result
 
-class Groupe(FlaskForm):
-    groupe = SelectField('groupe', choices=[('Non Selectionné','Non Selectionné')] + doSql(f"SELECT alim_grp_code ,alim_grp_nom_fr FROM GroupeAliment"))
-    sous_groupe = SelectField('sousGroupe')
-    sous_sous_groupe = SelectField('sousSousGroupe')
-    aliment = SelectField('aliment')
+class FormAliment(FlaskForm):
+    groupe = SelectField("groupe", choices=[("Non Selectionné","Non Selectionné")]+doSql(f"SELECT alim_grp_code, alim_grp_nom_fr FROM GroupeAliment"))
+    sous_groupe = SelectField("sous_groupe")
+    sous_sous_groupe = SelectField("sous_sous_groupe")
+    aliment = SelectField("aliment")
+
+    def __init__(self, type, i, *args, **kwargs):
+        super(FormAliment, self).__init__(*args, **kwargs)
+        self.groupe.name = "groupe_" + str(type) + str(i)
+        self.sous_groupe.name = "sous_groupe_" + str(type) + str(i)
+        self.sous_sous_groupe.name = "sous_sous_groupe_" + str(type) + str(i)
+        self.aliment.name = "aliment_" + str(type) + str(i)
+class Formulaire(FlaskForm):
+    ages = IntegerField(label="Entrez votre âge (10-18 ans)", id="age", name="age", validators=[validators.InputRequired(message="Veuillez renseigner votre âge"), validators.NumberRange(min=10, max=18, message="Vous devez avoir entre 10 et 18 ans")])
+    ville = SelectField("Entrez une ville", choices=[("","")], validators=[validators.InputRequired(message="Veuillez renseigner votre ville")])
+    alimentsMatin = []
+    alimentsSoir = []
+    def __init__(self, *args, **kwargs):
+        super(Formulaire, self).__init__(*args, **kwargs)
+        self.ville.choices += getVilles()
+        #groupeAliment =
+        for i in range(5):
+            self.alimentsMatin.append(FormAliment("matin", i))
+            self.alimentsSoir.append(FormAliment("soir", i))
+
 
     def personnaliser(self,s,i):
         self.groupe.name = "groupe_" + str(s) + str(i)
@@ -104,16 +137,12 @@ def sondage():
         villes = []
         for i in data:
             villes.append(i['nom'])
-        niveaux = doSql(f"SELECT NiveauScolaire FROM StatutScolaire")
-        formMatin=[]
-        formSoir=[]
-        for i in range(5):
-            formMatin.append(Groupe().personnaliser("matin",i))
-            formSoir.append(Groupe().personnaliser("soir",i))
+        #niveaux.name = "statut"
+        form = Formulaire()
         if request.args.get("values") != None:
-            return render_template("sondage.html", villes=villes, niveaux=niveaux, formMatin=formMatin, formSoir=formSoir, values=request.args.get("values"))
+            return render_template("sondage.html", villes=villes, niveaux=niveaux, formMatin=formMatin, formSoir=formSoir)
         else:
-            return render_template("sondage.html", villes=villes, niveaux=niveaux, formMatin=formMatin, formSoir=formSoir, values=None)
+            return render_template("sondage.html", form=form, values=None)
     return redirect(url_for('inscription'))
 
 
@@ -234,5 +263,7 @@ def verifierSondage():
 @app.route('/sondage/valider', methods=['GET'])
 def validerSondage():
     #ajouter les données dans la base de données
+    doSql("INSERT INTO Personne (nom, prenom, age, ville, mail, IDStatutScolaire) VALUES (%s, %s, %s, %s)", (session['id'], session['ville'], session['age'], session['niveau']))
+    doSql("INSERT INTO Sondage (idUtilisateur, ville, age, niveau, matin, soir) VALUES (%s, %s, %s, %s, %s, %s)", (session['id'], session['ville'], session['age'], session['niveau'], session['matin'], session['soir']))
     session['sondage']="Merci d'avoir rempli le sondage, celui-ci a bien été enregistré"
     return redirect(url_for('index'))
