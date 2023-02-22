@@ -6,6 +6,7 @@ import requests
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_wtf import FlaskForm
 from wtforms import SelectField, validators, StringField, IntegerField
+from datetime import datetime
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config["DEBUG"] = True
@@ -49,9 +50,18 @@ def doSql(sql):
         c.close()
         db.commit()
         db.close()
-    except mysql.connector.Error as e:
+    except mysql.connector.errors.ProgrammingError as e:
         print("erreur : ", e)
-        return doSql(sql)
+        return False,e
+    except mysql.connector.errors.IntegrityError as e:
+        print("erreur : ", e)
+        return False,e
+    except mysql.connector.Error as e:
+        if e.msg == "Too many connections":
+            print("erreur : ", e)
+            return doSql(sql)
+        print("erreur : ", e)
+        return False,e
     return result
 
 class FormAliment(FlaskForm):
@@ -69,6 +79,7 @@ class FormAliment(FlaskForm):
 class Formulaire(FlaskForm):
     ages = IntegerField(label="Entrez votre âge (10-18 ans)", id="age", name="age", validators=[validators.InputRequired(message="Veuillez renseigner votre âge"), validators.NumberRange(min=10, max=18, message="Vous devez avoir entre 10 et 18 ans")])
     ville = SelectField("Entrez une ville", choices=[("","")], validators=[validators.InputRequired(message="Veuillez renseigner votre ville")])
+    niveau = SelectField("Niveau d'étude", choices=[("","")]+doSql("SELECT IDStatutSColaire, NiveauScolaire FROM StatutScolaire"), validators=[validators.InputRequired(message="Veuillez renseigner votre niveau d'étude")])
     alimentsMatin = []
     alimentsSoir = []
     def __init__(self, *args, **kwargs):
@@ -195,25 +206,16 @@ def validate_sondage_form(form):
     else:
         form.data['age'] = form_age
 
-    form_ville = form.get('ville').capitalize()
-    uri = "https://geo.api.gouv.fr/communes"
-    try:
-        uResponse = requests.get(uri)
-    except requests.ConnectionError:
-        return "Connection Error"
-    Jresponse = uResponse.text
-    data = json.loads(Jresponse)
-    villes = []
-    for i in data:
-        villes.append(i['nom'])
-    if form_ville not in villes:
+    form_ville = form.get('ville')
+    villes = getVilles()
+    if (form_ville,form_ville) not in villes:
         form.errors['ville'] = "Vous devez renseigner une ville valide"
     else:
         form.data['ville'] = form_ville
 
     for i in form.keys():
         print(i, form.get(i))
-    form_niveau = form.get('statut')
+    form_niveau = form.get('niveau')
     if form_niveau is None:
         form.errors['niveau'] = "Vous devez renseigner votre niveau scolaire"
     else:
@@ -243,6 +245,8 @@ def validate_sondage_form(form):
 
     print(form.data['matin'])
     print(len(form.errors))
+    for i in form.errors:
+        print(i)
     return len(form.errors) == 0
 
 
@@ -252,18 +256,46 @@ def verifierSondage():
         return redirect(url_for('inscription'))
     if request.method == "POST":
         if not validate_sondage_form(request.form):
-            return redirect(url_for('sondage', values=request.form))
+            return redirect(url_for('sondage'))
         session['ville']=request.form.data['ville']
         session['age']=request.form.data['age']
         session['niveau']=request.form.data['niveau']
-        session['matin']=request.form.data['matin']
-        session['soir']=request.form.data['soir']
+        # remplir les données de la session matin et soir avec les données du formulaire (request.form) et mettre vide pour les aliments non renseignés (None) pour avoir une liste de 5 éléments
+        session['matin'] = request.form.data['matin']
+        for i in range(len(session['matin']),5):
+            session['matin'].append(None)
+        print(session['matin'])
+        session['soir'] = request.form.data['soir']
+        for i in range(len(session['soir']),5):
+            session['soir'].append(None)
+        print(session['soir'])
+
         return redirect(url_for('validerSondage'))
 
 @app.route('/sondage/valider', methods=['GET'])
 def validerSondage():
     #ajouter les données dans la base de données
-    doSql("INSERT INTO Personne (nom, prenom, age, ville, mail, IDStatutScolaire) VALUES (%s, %s, %s, %s)", (session['id'], session['ville'], session['age'], session['niveau']))
-    doSql("INSERT INTO Sondage (idUtilisateur, ville, age, niveau, matin, soir) VALUES (%s, %s, %s, %s, %s, %s)", (session['id'], session['ville'], session['age'], session['niveau'], session['matin'], session['soir']))
+    command = f"INSERT INTO Personne (nom, prenom, age, ville, mail, IDStatutScolaire) VALUES ('{session['nom']}', '{session['prenom']}', {session['age']}, \"{session['ville']}\", '{session['mail']}', {session['niveau']})"
+    if doSql(command) is False:
+        return redirect(url_for('inscription'))
+    command = f"SELECT id FROM Personne WHERE nom = '{session['nom']}' AND prenom = '{session['prenom']}' AND age = {session['age']} AND ville = \"{session['ville']}\" AND mail = '{session['mail']}' AND IDStatutScolaire = {session['niveau']}"
+    idPersonne = doSql(command)
+    if idPersonne is False:
+        return redirect(url_for('inscription'))
+    idPersonne = idPersonne[0][0]
+    command = f"INSERT INTO Sondage (idPersonne, date, alimentMatin1, alimentMatin2, alimentMatin3, alimentMatin4, alimentMatin5, alimentSoir1, alimentSoir2, alimentSoir3, alimentSoir4, alimentSoir5) VALUES ({idPersonne}, '{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}'" \
+              f", {replaceNoneForSQL(session['matin'][0])}, {replaceNoneForSQL(session['matin'][1])}, {replaceNoneForSQL(session['matin'][2])}, {replaceNoneForSQL(session['matin'][3])}, {replaceNoneForSQL(session['matin'][4])}" \
+              f", {replaceNoneForSQL(session['soir'][0])}, {replaceNoneForSQL(session['soir'][1])}, {replaceNoneForSQL(session['soir'][2])}, {replaceNoneForSQL(session['soir'][3])}, {replaceNoneForSQL(session['soir'][4])})"
+
+    print(command)
+    if doSql(command) is False:
+        return redirect(url_for('inscription'))
     session['sondage']="Merci d'avoir rempli le sondage, celui-ci a bien été enregistré"
     return redirect(url_for('index'))
+
+
+def replaceNoneForSQL(value):
+    if value is None:
+        return "NULL"
+    else:
+        return value

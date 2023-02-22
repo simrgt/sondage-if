@@ -32,20 +32,11 @@
             {{ form.ville.label|safe }}
             {{ form.ville(class_="inputText", placeholder="Insérez votre ville") }}
         </div>
-        {% if 'ville' in values.errors %}
-            <p class="help has-background-warning">
-                {{ values.errors['ville'] }}
-            </p>
-        {% endif %}
         <div class="inputs">
-            <label>Niveau Scolaire</label>
-            {{ niveaux }}
+            {{ form.crsf_token }}
+            {{ form.niveau.label|safe }}
+            {{ form.niveau }}
         </div>
-        {% if 'statutscolaire' in values.errors %}
-            <p class="help has-background-warning">
-                {{ values.errors['statutscolaire'] }}
-            </p>
-        {% endif %}
         <div class="aliment">
             <div>
                 <input type="checkbox" id="RMatin" name="RMatin" checked>
