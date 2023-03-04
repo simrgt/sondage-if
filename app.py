@@ -100,6 +100,7 @@ class Formulaire(FlaskForm):
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
+    doSql("SELECT * FROM Personne")
     if session.get('error') is not None :
         return render_template("index.html", error=session['error'])
     if session.get('sondage') is not None :

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/OLDindex.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+</head>
+
+<body>
+<div class="header">
+    {#<div class="titre">
+      <h1>Sondage</h1>
+    </div>#}
+</div>
+<div class="main">
+    <div class="form">
+        {% if error %}
+          <p class=error><strong>Error:</strong> {{ error }}
+        {% endif %}
+        <div class="imglogo">
+            <img id="logo" src="{{ url_for('static', filename='images/LogoInterComm.png') }}" alt="LogoInterComm"/>
+        </div>
+        <div class="contentForm">
+            <form method="post" action="{{ url_for("inscription") }}" enctype="multipart/form-data">
+                <div class="inputs">
+                    <input class="inputText" type="text" id="nom" name="nom" value="{{ nom }}" required
+                           placeholder="Insérez votre nom"><br>
+                </div>
+                <div class="inputs">
+                    <input class="inputText" type="text" id="prenom" name="prenom" placeholder="Insérez votre prénom"
+                           required><br>
+                </div>
+                <div class="inputs">
+                    <input class="inputText" type="email" id="email" name="email" placeholder="Insérez votre email"
+                           required><br>
+                </div>
+                <p><input type="checkbox" name="choix" required> J'accepte les <a href="/CGU/" target="_blank"
+                                                                                  rel="noopener noreferrer">conditions
+                    d'utilisation</a> du sondage.</p>
+
+                <button id="valider" type="submit">Valider</button>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="footer">
+
+</div>
+</body>
+
+</html>
