@@ -4,5 +4,5 @@ requests
 Flask-WTF
 Flask-Login
 Werkzeug
-Flask-MySQLdb
+mysqlclient
 Flask-SQLAlchemy
