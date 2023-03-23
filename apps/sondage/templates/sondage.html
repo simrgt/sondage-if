@@ -21,7 +21,7 @@
     <div class="imglogo">
           <img id="logo" src="{{ url_for('static', filename='images/LogoInterComm.png') }}" alt="LogoInterComm" />
     </div>
-    <form method="post" action="{{ url_for("verifierSondage") }}" enctype="multipart/form-data">
+    <form method="post" action="{{ url_for("sondage.verifierSondage") }}" enctype="multipart/form-data">
         <div class="inputs">
             {{ form.crsf_token }}
             {{ form.ages.label|safe }}
