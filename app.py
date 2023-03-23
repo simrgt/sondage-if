@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import mysql.connector
 import requests
+import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from flask_wtf import FlaskForm
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
@@ -10,6 +11,9 @@ from flask_sqlalchemy import SQLAlchemy
 from wtforms import SelectField, validators, StringField, IntegerField
 from datetime import datetime
 from werkzeug.security import check_password_hash
+
+
+os.system('sudo apt-get install mysql-server')
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config["DEBUG"] = True
