@@ -2,3 +2,7 @@ Flask
 mysql-connector-python
 requests
 Flask-WTF
+Flask-Login
+Werkzeug
+Flask-MySQLdb
+Flask-SQLAlchemy

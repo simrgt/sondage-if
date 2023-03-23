@@ -163,8 +163,38 @@ form{
   background-color: rgba(0, 0, 0, 0.7);
 }
 
+.info{
+  width: 80%;
+  margin-top: 30px;
+  text-align: center;
+  font-size: 0.85em;
+}
 
 
+
+#adminButton{
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  color: #ffff;
+  background-color: rgba(255, 178, 36, 0.6);
+  min-width: 10%;
+  top: 0;
+  right: 0;
+  margin: 10px 10px 0 0;
+  padding: 1em;
+  border-radius: 3px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  z-index: 9999999;
+  transition: 500ms ease all;
+}
+
+#adminButton:hover{
+  transform: scale(0.90);
+}
 
 /* MOUSE TRAIL */
 

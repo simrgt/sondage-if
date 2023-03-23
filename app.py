@@ -3,10 +3,13 @@ from datetime import timedelta
 
 import mysql.connector
 import requests
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, flash
 from flask_wtf import FlaskForm
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
+from flask_sqlalchemy import SQLAlchemy
 from wtforms import SelectField, validators, StringField, IntegerField
 from datetime import datetime
+from werkzeug.security import check_password_hash
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config["DEBUG"] = True
@@ -15,6 +18,19 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql://uuzatrxwtm5bvkfs:6oA93y9BanYIW7ON2Vf9@bhbwarujbtx4tqheer1l-mysql.services.clever-cloud.com:3306/bhbwarujbtx4tqheer1l"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    # since the user_id is just the primary key of our user table, use it in the query for the user
+    return Admin.query.get(int(user_id))
 
 configDB = {
     'host':"bqpjqiutmrlk6tkmm9ef-mysql.services.clever-cloud.com",
@@ -41,15 +57,15 @@ def getVilles():
         villes.append((i['nom'], i['nom']))
     return villes
 def doSql(sql):
-    connection_pool = mysql.connector.pooling.MySQLConnectionPool(pool_name="mypool", pool_size=1, **configDB)
+
     try :
-        db = connection_pool.get_connection()
-        c = db.cursor()
+        db1 = mysql.connector.connect(pool_name="mypool", pool_size=1, **configDB)
+        c = db1.cursor()
         c.execute(sql)
         result = c.fetchall()
         c.close()
-        db.commit()
-        db.close()
+        db1.commit()
+        db1.close()
     except mysql.connector.errors.ProgrammingError as e:
         print("erreur : ", e)
         return False,e
@@ -63,6 +79,11 @@ def doSql(sql):
         print("erreur : ", e)
         return False,e
     return result
+
+class Admin(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
+    login = db.Column(db.String(20), unique=True, nullable=False)
+    mdp = db.Column(db.String(20), nullable=False)
 
 class FormAliment(FlaskForm):
     groupe = SelectField("groupe", choices=[("Non Selectionné","Non Selectionné")]+doSql(f"SELECT alim_grp_code, alim_grp_nom_fr FROM GroupeAliment"))
@@ -156,6 +177,37 @@ def sondage():
         else:
             return render_template("sondage.html", form=form, values=None)
     return redirect(url_for('inscription'))
+
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+@app.route('/loginpost', methods=['POST'])
+def login_post():
+    login = request.form.get('login')
+    password = request.form.get('password')
+    print(login, password)
+    remember = True if request.form.get('remember') else False
+
+    user = Admin.query.filter_by(login=login).first()
+    print(user.mdp, not check_password_hash(user.mdp, password))
+
+    # check if the user actually exists
+    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+    if not user or user.mdp != password:
+        flash('Please check your login details and try again.')
+        return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
+
+    # if the above check passes, then we know the user has the right credentials
+    login_user(user, remember=remember)
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin')
+@login_required
+def admin():
+    return render_template('admin.html', name=current_user.login)
 
 
 @app.route('/api/sousGroupe/<groupe>')

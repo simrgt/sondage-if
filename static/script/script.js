@@ -87,7 +87,6 @@ function changeSsGrp(parent) {
 }
 function changeSsSsGrp(parent) {
     let sousSousGroupe = parent.parentElement.children.sous_sous_groupe;
-    console.log(sousSousGroupe);
     let groupe_val = parent.value;
     if (groupe_val in ssSsGrp) {
         if (ssSsGrp[groupe_val].length <= 1) {
@@ -162,7 +161,6 @@ function cacherListe(parent) {
     for (let i = 0; i < groupes.length; i++) {
         if (!index) {
             for (let j = 0; j < groupes.item(i).children.length; j++) {
-                console.log(groupes.item(i).children.item(j));
                 activer(groupes.item(i).children.item(j));
             }
             if (groupes.item(i).children.groupe.value === "Non Selectionné")
