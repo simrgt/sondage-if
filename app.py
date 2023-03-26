@@ -10,7 +10,6 @@ from apps.api.views import api
 from database.database import doSQLAdmin
 
 
-
 app = Flask(__name__)
 # setup with the configuration provided
 app.config.from_object('config.DevelopmentConfig')

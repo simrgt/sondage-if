@@ -9,3 +9,4 @@ class User(UserMixin):
 
     def __repr__(self):
         return "%d/%s/%s" % (self.id, self.login, self.password)
+

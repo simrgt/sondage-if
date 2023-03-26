@@ -3,8 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="{{ url_for('static', filename='Chart.js/dist/chart.umd.js') }}"></script>
 </head>
 <body>
-    salut {{ name }} !
+
+<canvas id="myChart" width="400" height="200"></canvas>
+<script type="text/javascript">
+    {#console.log({{ nbSondage }});#}
+    var ctx = document.getElementById("myChart");
+    new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: {{ label|safe }},
+            datasets: [{
+                data: {{ nbSondage|safe }},
+                label: "nbSondage",
+                borderColor: "#3e95cd",
+                fill: false
+              }
+            ]
+          },
+          options: {
+            title: {
+              display: true,
+              text: 'Nombre de Sondage en fonction de la date'
+            },
+            hover: {
+             mode: 'index',
+             intersect: true
+            },
+            scales: {
+              xAxes: [{
+                display: true,
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Date'
+                }
+              }],
+              yAxes: [{
+                display: true,
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Nombre de Sondage'
+                },
+                ticks: {
+                  beginAtZero: true
+                }
+              }]
+            }
+          }
+
+        });
+</script>
 </body>
 </html>

@@ -20,47 +20,45 @@
   <div class="main">
   <button id="adminButton" type="button" onclick="location.href='{{ url_for("analyse.login") }}'">Admin</button>
     <div class="form-box">
-      <!-- <div class="imglogo">
-        <img id="logo" src="images/LogoInterComm_remove.png" alt="LogoInterComm" />
-      </div> -->
-        {% if error %}
-          <p class=error><strong>Error:</strong> {{ error }}
-        {% endif %}
-      <div class="header">
-        <h2 class="titre">Formulaire</h2>
-      </div>
-      <div class="form">
+        <div class="inscription">
+            {% if error %}
+              <p class=error><strong>Error:</strong> {{ error }}
+            {% endif %}
+          <div class="header">
+            <h2 class="titre">Formulaire</h2>
+          </div>
+          <div class="form">
 
-        <form method="post" action="{{ url_for("main.inscription") }}" enctype="multipart/form-data">
-          <div class="inputs">
-            <input class="inputText" type="text" title="Veuillez renseignez votre nom" id="nom" name="nom" required>
-            <label for="nom">Nom</label>
+            <form method="post" action="{{ url_for("main.inscription") }}" enctype="multipart/form-data">
+              <div class="inputs">
+                <input class="inputText" type="text" title="Veuillez renseignez votre nom" id="nom" name="nom" required>
+                <label for="nom">Nom</label>
+              </div>
+              <div class="inputs">
+                <input class="inputText" type="text" title="Veuillez renseignez votre prénom" id="prenom" name="prenom"
+                  required>
+                <label for="prenom">Prénom</label>
+              </div>
+              <div class="inputs">
+                <input class="inputText" type="email" title="Veuillez renseignez votre email" id="email" name="email"
+                  required>
+                <label for="email">Email</label>
+              </div>
+              <div class="FinForm">
+                <input type="checkbox" name="choix" required>
+                <label>J'accepte les <a href="/CGU" target="_blank" rel="noopener noreferrer">conditions
+                    d'utilisation</a> du sondage.</label>
+              </div>
+              <div class="validation">
+                <button id="valider" type="submit">Valider</button>
+              </div>
+              <div class="info">
+                <p id="infoText">Les données récoltées sont utilisés uniquement dans le but de permettre l'amélioration de
+                nos services.</p>
+              </div>
+            </form>
           </div>
-          <div class="inputs">
-            <input class="inputText" type="text" title="Veuillez renseignez votre prénom" id="prenom" name="prenom"
-              required>
-            <label for="prenom">Prénom</label>
-          </div>
-          <div class="inputs">
-            <input class="inputText" type="email" title="Veuillez renseignez votre email" id="email" name="email"
-              required>
-            <label for="email">Email</label>
-          </div>
-          <div class="FinForm">
-            <input type="checkbox" name="choix" required>
-            <label>J'accepte les <a href="/CGU" target="_blank" rel="noopener noreferrer">conditions
-                d'utilisation</a> du sondage.</label>
-          </div>
-          <div class="validation">
-            <button id="valider" type="submit">Valider</button>
-          </div>
-          <div class="info">
-            <p id="infoText">Les données récoltées sont utilisés uniquement dans le but de permettre l'amélioration de
-            nos services.</p>
-          </div>
-        </form>
-      </div>
-
+        </div>
     </div>
   </div>
   <div class="footer">

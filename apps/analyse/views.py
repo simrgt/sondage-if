@@ -1,15 +1,32 @@
-from flask import Blueprint, request, url_for, redirect, render_template, flash
-from flask_login import login_required, current_user, login_user, LoginManager
+import datetime
+
+from flask import Blueprint, request, url_for, redirect, render_template, flash, send_file
+from flask_login import login_required, current_user, login_user
+
 
 from apps.analyse.models import User
-from database.database import doSQLAdmin
+from database.database import doSQLAdmin, doSqlWithoutEffect
 
 analyse = Blueprint('analyse', __name__, template_folder="templates")
 
-@analyse.route('dashboard')
+def getData():
+    data = doSqlWithoutEffect("SELECT COUNT(id), date FROM Sondage GROUP BY date ORDER BY date DESC")
+    print(data)
+    label = []
+    value = []
+    for i in range(len(data)):
+        data[i] = list(data[i])
+        data[i][1] = data[i][1].strftime("%d/%m/%Y")
+        label.append(data[i][1])
+        value.append(data[i][0])
+    print(data)
+    return label, value
+
+@analyse.route('admin')
 @login_required
 def admin():
-    return render_template('admin.html', name=current_user.login)
+    label, value = getData()
+    return render_template('admin.html', label=label, nbSondage=value)
 
 @analyse.route("/login")
 def login():

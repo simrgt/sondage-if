@@ -17,73 +17,78 @@
 </head>
 <body>
 <div class="main">
-  <div class="form">
-    <div class="imglogo">
-          <img id="logo" src="{{ url_for('static', filename='images/LogoInterComm.png') }}" alt="LogoInterComm" />
-    </div>
-    <form method="post" action="{{ url_for("sondage.verifierSondage") }}" enctype="multipart/form-data">
-        <div class="inputs">
-            {{ form.crsf_token }}
-            {{ form.ages.label|safe }}
-            {{ form.ages(class_="inputText", placeholder="Insérez votre âge") }}
-        </div>
-        <div class="inputs">
-            {{ form.crsf_token }}
-            {{ form.ville.label|safe }}
-            {{ form.ville(class_="inputText", placeholder="Insérez votre ville") }}
-        </div>
-        <div class="inputs">
-            {{ form.crsf_token }}
-            {{ form.niveau.label|safe }}
-            {{ form.niveau }}
-        </div>
-        <div class="aliment">
-            <div>
-                <input type="checkbox" id="RMatin" name="RMatin" checked>
-                <label for="RMatin">Repas du matin</label>
+    <div class="form-box">
+        <div class="form">
+            <div class="header">
+{#                <img id="logo" src="{{ url_for('static', filename='images/LogoInterComm.png') }}" alt="LogoInterComm" />#}
+                <h2>Formulaire de sondage</h2>
             </div>
-            <div class="cache">
-                {% for categorie in form.alimentsMatin %}
-                    <div>
-                    {{ categorie.crsf_token }}
-                    {{ categorie.groupe }}
-                    {{ categorie.sous_groupe }}
-                    {{ categorie.sous_sous_groupe }}
-                    {{ categorie.aliment }}
+            <form method="post" action="{{ url_for("sondage.verifierSondage") }}" enctype="multipart/form-data">
+            {{ form.crsf_token }}
+                <div class="inputs">
+                    {{ form.ages.label|safe }}
+                    {{ form.ages(class_="inputText", placeholder="Insérez votre âge") }}
+                </div>
+                <div class="inputs">
+                    {{ form.ville.label|safe }}
+                    {{ form.ville(class_="inputText") }}
+                </div>
+                <div class="inputs">
+                    {{ form.niveau.label|safe }}
+                    {{ form.niveau }}
+                </div>
+                <div class="aliments">
+                    <div class="aliment">
+                        <div>
+                            <input type="checkbox" id="RMatin" name="RMatin" checked>
+                            <label for="RMatin">Repas du matin</label>
+                        </div>
+                        <div class="cache">
+                            {% for categorie in form.alimentsMatin %}
+                                <div>
+                                    {{ categorie.groupe|safe }}
+                                    {{ categorie.sous_groupe|safe }}
+                                    {{ categorie.sous_sous_groupe|safe }}
+                                    {{ categorie.aliment|safe }}
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                {% endfor %}
-            </div>
-        </div>
 
-        <div class="aliment">
-            <div>
-                <input type="checkbox" id="RSoir" name="RSoir" checked>
-                <label for="RSoir">Repas du soir</label>
-            </div>
+                    <div class="aliment">
+                        <div>
+                            <input type="checkbox" id="RSoir" name="RSoir" checked>
+                            <label for="RSoir">Repas du soir</label>
+                        </div>
 
-            <div class="cache2">
-                 {% for categorie in form.alimentsSoir %}
-                    <div>
-                    {{ categorie.crsf_token }}
-                    {{ categorie.groupe }}
-                    {{ categorie.sous_groupe }}
-                    {{ categorie.sous_sous_groupe }}
-                    {{ categorie.aliment }}
+                        <div class="cache2">
+                            {% for categorie in form.alimentsSoir %}
+                                <div>
+                                    {{ categorie.groupe|safe }}
+                                    {{ categorie.sous_groupe|safe }}
+                                    {{ categorie.sous_sous_groupe|safe }}
+                                    {{ categorie.aliment|safe }}
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                {% endfor %}
-            </div>
+                </div>
+                <div class="validation">
+                    <button id="valider" type="submit">Valider</button>
+                </div>
+            </form>
         </div>
-        <button id="valider" type="submit">Valider</button>
-    </form>
   </div>
 </div>
 
 <script>
     $(document).ready(function() {
     $('#ville').select2({  // init Select2 on form's name field
-        placeholder: "{{ form.ville.label.text }}",
-        allowClear: true,
-        "width": "style"
+        placeholder: "Cliquez ici pour rechercher votre ville",
+        allowClear: false,
+        multiple: false,
+        width: 'resolve',
+        theme: "flat"
     });
 });
 </script>

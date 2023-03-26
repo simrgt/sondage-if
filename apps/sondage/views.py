@@ -7,16 +7,15 @@ from database.database import doSqlWithEffect, replaceNoneForSQL, getVilles, doS
 sondage = Blueprint('sondage', __name__, template_folder="templates", static_folder="static")
 
 
+
 @sondage.route("", methods=["POST", "GET"])
 def index():
     if session.permanent is False:
         return redirect(url_for('main.inscription'))
     if request.method == "GET" or request.method == "POST":
         form = Formulaire()
-        if request.args.get("values") != None:
-            return render_template("sondage.html", form=form, values=request.args.get("values"))
-        else:
-            return render_template("sondage.html", form=form, values=None)
+        print(form.alimentsMatin)
+        return render_template('sondage.html', form=form)
     return redirect(url_for('main.inscription'))
 
 @sondage.route('/verifier', methods=['POST'])
@@ -64,6 +63,7 @@ def validerSondage():
     if doSqlWithEffect(command) is False:
         return redirect(url_for('sondage.index'))
     session['sondage']="Merci d'avoir rempli le sondage, celui-ci a bien été enregistré"
+    session['formulaire_soumis'] = True
     return redirect(url_for('main.index'))
 
 

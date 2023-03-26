@@ -4,3 +4,5 @@ requests
 Flask-WTF
 Flask-Login
 Werkzeug
+seaborn
+matplotlib

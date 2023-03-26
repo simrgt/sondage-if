@@ -34,6 +34,7 @@ function init() {
     groupe_select.each( function () {
         this.onchange = function () {
             changeSsGrp(this);
+            // cacherListe(this);
         };
     });
     sousGroupe_select.each( function () {
@@ -51,7 +52,8 @@ function init() {
     });
 }
 
-function changeSsGrp(parent) {
+async function changeSsGrp(parent) {
+    cacherListe(parent);
     let sousGroupe = parent.parentElement.children.sous_groupe;
     let groupe_val = parent.value;
     if (!(groupe_val === "Non Selectionné")) {
@@ -63,7 +65,7 @@ function changeSsGrp(parent) {
             sousGroupe.innerHTML = optionHTML;
             changeSsSsGrp(sousGroupe);
         } else {
-            fetch('/api/sousGroupe/' + groupe_val).then(function (response) {
+            await fetch('/api/sousGroupe/' + groupe_val).then(function (response) {
                 response.json().then(function (data) {
                     ssGrp[groupe_val] = data.sousGroupe;
                     let optionHTML = '';
@@ -75,30 +77,25 @@ function changeSsGrp(parent) {
                 });
             });
         }
-        afficher(sousGroupe);
-        afficher(sousGroupe.parentElement.children.aliment);
-    } else {
-        cacher(sousGroupe);
-        cacher(sousGroupe.parentElement.children.sous_sous_groupe);
-        cacher(sousGroupe.parentElement.children.aliment);
-
     }
-    cacherListe(parent);
 }
 function changeSsSsGrp(parent) {
     let sousSousGroupe = parent.parentElement.children.sous_sous_groupe;
     let groupe_val = parent.value;
     if (groupe_val in ssSsGrp) {
-        if (ssSsGrp[groupe_val].length <= 1) {
-            cacher(sousSousGroupe);
-        } else {
-            afficher(sousSousGroupe);
-        }
         let optionHTML = '';
         for (let sousSousGroupe of ssSsGrp[groupe_val]) {
             optionHTML += '<option value="' + sousSousGroupe.id + '">' + sousSousGroupe.name + '</option>';
         }
         sousSousGroupe.innerHTML = optionHTML;
+        console.log(sousSousGroupe);
+        console.log(sousSousGroupe.options.length);
+        if (sousSousGroupe.options.length <= 1) {
+            console.log("cacher");
+            cacher(sousSousGroupe);
+        } else {
+            afficher(sousSousGroupe);
+        }
         changeAliment2(sousSousGroupe);
     } else {
         fetch('/api/sousSousGroupe/' + groupe_val).then(function (response) {
@@ -142,6 +139,7 @@ function changeAliment2(parent) {
             });
         });
     }
+
 }
 
 function cacher(element) {
@@ -159,30 +157,13 @@ function cacherListe(parent) {
     groupes = div.children;
     let index = false;
     for (let i = 0; i < groupes.length; i++) {
-        if (!index) {
-            for (let j = 0; j < groupes.item(i).children.length; j++) {
-                activer(groupes.item(i).children.item(j));
-            }
+        for (let j = 0; j < groupes.item(i).children.length; j++) {
+            if (!index)
+                    afficher(groupes.item(i).children.item(j));
+            else
+                cacher(groupes.item(i).children.item(j));
             if (groupes.item(i).children.groupe.value === "Non Selectionné")
                 index = true;
-        } else {
-            for (let j = 0; j < groupes.item(i).children.length; j++) {
-                desactiver(groupes.item(i).children.item(j));
-            }
         }
     }
-    /*for (let i = 0; i < index; i++) {
-        desactiver(groupes[i].parentElement);
-    }
-    for (let i = index; i < groupes.length; i++) {
-        activer(groupes[i].parentElement);
-    }*/
-}
-
-function activer(element) {
-    element.disabled = false;
-}
-
-function desactiver(element) {
-    element.disabled = true;
 }

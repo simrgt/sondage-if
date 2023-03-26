@@ -2,12 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Title</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 </head>
 <body>
-<div class="column is-4 is-offset-4">
-    <h3 class="title">Login</h3>
-    <div class="box">
+<div class="main">
+    <div class="form-box">
+        <div class="header">
+            <h3 class="title">Connexion Admin</h3>
+        </div>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
             <div class="notification is-danger">
@@ -17,23 +23,25 @@
         {% endwith %}
         <form method="POST" action="{{ url_for("analyse.login_post") }}">
             <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="text" name="login" placeholder="Your Email" autofocus="">
+                <div class="inputs">
+                    <input class="input is-large" type="text" name="login" placeholder="Login" autofocus="">
+                    <label for="login">Login</label>
                 </div>
             </div>
 
             <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="password" name="password" placeholder="Your Password">
+                <div class="inputs">
+                    <input class="input is-large" type="password" name="password" placeholder="Mot de passe">
+                    <label for="password">Mot de passe</label>
                 </div>
             </div>
             <div class="field">
                 <label class="checkbox">
                     <input type="checkbox">
-                    Remember me
+                    Se souvenir de moi
                 </label>
             </div>
-            <button class="button is-block is-info is-large is-fullwidth">Login</button>
+            <button id="valider" type="submit">Se connecter</button>
         </form>
     </div>
 </div>
