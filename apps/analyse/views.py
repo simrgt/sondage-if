@@ -1,7 +1,7 @@
 import datetime
 
-from flask import Blueprint, request, url_for, redirect, render_template, flash, send_file
-from flask_login import login_required, current_user, login_user
+from flask import Blueprint, request, url_for, redirect, render_template, flash
+from flask_login import login_required, login_user
 
 
 from apps.analyse.models import User

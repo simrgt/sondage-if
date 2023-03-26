@@ -221,7 +221,7 @@ form{
     font-size: large;
 }
   .form-box{
-      width: 60%;
+      width: 40%;
       display: flex;
       justify-content: center;
       align-items: center;
