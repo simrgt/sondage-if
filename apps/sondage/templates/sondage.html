@@ -21,7 +21,7 @@
         <div class="form">
             <div class="header">
 {#                <img id="logo" src="{{ url_for('static', filename='images/LogoInterComm.png') }}" alt="LogoInterComm" />#}
-                <h2>Formulaire de sondage</h2>
+                <h2 class="titre">Formulaire de sondage</h2>
             </div>
             <form method="post" action="{{ url_for("sondage.verifierSondage") }}" enctype="multipart/form-data">
             {{ form.crsf_token }}

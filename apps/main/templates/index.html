@@ -20,7 +20,6 @@
   <div class="main">
   <button id="adminButton" type="button" onclick="location.href='{{ url_for("analyse.login") }}'">Admin</button>
     <div class="form-box">
-        <div class="inscription">
             {% if error %}
               <p class=error><strong>Error:</strong> {{ error }}
             {% endif %}

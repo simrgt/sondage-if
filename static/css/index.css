@@ -6,25 +6,34 @@
     box-sizing: border-box;
 }
 
+body{
+  background-color: #000000
+}
+
 .main{
   display:flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
-  background: url('../images/bg2.jpg')no-repeat;
+  background: url('../images/bg2.jpg');
+  background-repeat: no-repeat;
   background-position: center;
-  background-size: cover;
+  background-attachment: fixed;
+  background-size: 100%;
   overflow: hidden;
 }
 
 .form-box{
-  width: 90%;
+  position: relative;
+  width: 400px;
+  height: 500px;
   background-color: transparent;
   /* border: solid 2px rgba(242, 159, 5, 0.5); */
   border: solid 2px rgba(0, 0, 0, 0.5);
   border-radius: 20px;
+  -webkit-backdrop-filter: blur(30px);
   backdrop-filter: blur(30px);
   display: flex;
   flex-direction: column;
@@ -32,15 +41,8 @@
   align-items: center;
 }
 
-.inscription{
-  margin: 5%;
-  width: 90%;
-}
-
 .header{
-    position: relative;
-    margin: auto;
-    width: 60%;
+  position: relative;
 }
 
 .titre{
@@ -48,7 +50,6 @@
   /* border: solid 2px red; */
   color: #000000;
   --myVar: black;
-  text-align: center;
 }
 
 .titre::before{
@@ -60,7 +61,7 @@
   width: 100%;
   background-color: transparent;
   backdrop-filter:blur(1px);
-  border-left: 2px solid black;
+  /* border-left: 2px solid transparent; */
   animation: animate 4s steps(96) infinite;
 }
 @keyframes animate{
@@ -176,8 +177,6 @@ form{
   font-size: 0.85em;
 }
 
-
-
 #adminButton{
   position: absolute;
   display: flex;
@@ -188,13 +187,12 @@ form{
   min-width: 10%;
   top: 0;
   right: 0;
-  margin: 10px 10px 0 0;
+  margin: 1% 1% 0 0;
   padding: 1em;
   border-radius: 3px;
   font-weight: 700;
   border: none;
   cursor: pointer;
-  z-index: 9999999;
   transition: 500ms ease all;
 }
 
@@ -216,57 +214,46 @@ form{
   position: absolute;
 }
 
-@media screen and (min-width: 1024px) {
-  *{
-    font-size: large;
-}
+/* PHONE RESPONSIVE */
+
+@media only screen and (max-width: 300px) {
   .form-box{
-      width: 40%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    width: 200px;
+    height: 400px;
   }
 
-  .form{
-    width: 90%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  .FinForm{
+    font-size: 0.8em;
   }
-
-  .inputs{
-    width: 90%;
-  }
-
-    .header{
-        width: 50%;
-    }
 }
 
-/* TABLET RESPONSIVE */
-
-@media screen and (min-width: 768px) and (max-width: 1023px) {
+@media only screen and (max-width: 400px) {
   .form-box{
-    width: 80%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 350px;
   }
 
-  .form{
-    width: 95%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  .FinForm{
+    font-size: 0.8em;
   }
 
-  .inputs{
-    width: 90%;
+  .info{
+    margin-top: 10px;
   }
+}
 
-  .header{
-    width: 50%;
+@media only screen and (min-width: 400px){
+  .info{
+    margin-top: 10px;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .form-box{
+    width: 500px;
+    height: 600px;
+  }
+    
+  .FinForm{
+    font-size: 1.1em;
   }
 }

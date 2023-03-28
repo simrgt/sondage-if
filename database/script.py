@@ -44,15 +44,19 @@ def doSqlWithoutEffect(sql):
         db1.close()
     except mysql.connector.errors.ProgrammingError as e:
         print("erreur : ", e)
+        db1.close()
         return False
     except mysql.connector.errors.IntegrityError as e:
         print("erreur : ", e)
+        db1.close()
         return False
     except mysql.connector.Error as e:
         if e.msg == "Too many connections":
             print("erreur : ", e)
+            db1.close()
             return doSqlWithoutEffect(sql)
         print("erreur : ", e)
+        db1.close()
         return False
     return result
 
@@ -83,8 +87,28 @@ def modifySondage():
     for i in range(88-32):
         insertSondage(i+50,aliments)
 
+def deleteAliment():
+    aliments = doSqlWithoutEffect("SELECT alim_code FROM Aliment")
+    # get random alim_code
+    alim = aliments[random.randint(0, len(aliments)-1)][0]
+
+    # number of row in table Sondage
+    nb = doSqlWithoutEffect("SELECT COUNT(*) FROM Sondage")[0][0]
+    # for row in table Sondage update random row with random aliment and in random case replace with null
+    for i in range(nb):
+        time.sleep(0.4)
+        doSqlWithEffect(f"UPDATE Sondage SET alimentMatin{random.randint(1,5)} = {aliments[random.randint(0, len(aliments)-1)][0]} WHERE id = {random.randint(1, nb)}")
+        time.sleep(0.4)
+        doSqlWithEffect(f"UPDATE Sondage SET alimentSoir{random.randint(1,5)} = {aliments[random.randint(0, len(aliments)-1)][0]} WHERE id = {random.randint(1, nb)}")
+        time.sleep(0.4)
+        doSqlWithEffect(f"UPDATE Sondage SET alimentMatin{random.randint(1,5)} = NULL WHERE id = {random.randint(1, nb)}")
+        time.sleep(0.4)
+        doSqlWithEffect(f"UPDATE Sondage SET alimentSoir{random.randint(1,5)} = NULL WHERE id = {random.randint(1, nb)}")
+
+
 if __name__ == '__main__':
-    modifySondage()
+    deleteAliment()
+    print("done")
 
 
 
