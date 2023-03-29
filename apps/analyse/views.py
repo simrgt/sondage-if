@@ -44,11 +44,11 @@ def login_post():
     rv = doSQLAdmin("SELECT * FROM user WHERE login = ?", (login,))
 
     if rv == [] or len(rv) != 1:
-        flash('Please check your login details and try again.')
+        flash('Merci de vérifié vos identifiants.')
         return redirect(url_for('analyse.login'))
     print(rv[0][2] != password)
     if rv[0][2] != password:
-        flash('Please check your login details and try again.')
+        flash('Merci de vérifié vos identifiants.')
         return redirect(url_for('analyse.login'))
     # if the above check passes, then we know the user has the right credentials
     user = User(rv[0][0], rv[0][1], rv[0][2])

@@ -20,9 +20,16 @@
   <div class="main">
   <button id="adminButton" type="button" onclick="location.href='{{ url_for("analyse.login") }}'">Admin</button>
     <div class="form-box">
-            {% if error %}
-              <p class=error><strong>Error:</strong> {{ error }}
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% if messages[0] %}
+                <div class="notification is-danger">
+                    <p class="flash">{{ messages[0] }}</p>
+                </div>
+               {% set _ = session.clear() %}
             {% endif %}
+        {% endif %}
+        {% endwith %}
           <div class="header">
             <h2 class="titre">Formulaire</h2>
           </div>

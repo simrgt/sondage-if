@@ -1,4 +1,4 @@
-from flask import Blueprint, request, url_for, redirect, render_template, session
+from flask import Blueprint, request, url_for, redirect, render_template, session, flash
 from database.database import doSqlWithoutEffect
 
 main = Blueprint('main', __name__, template_folder="templates")
@@ -8,11 +8,11 @@ main = Blueprint('main', __name__, template_folder="templates")
 def index():
     doSqlWithoutEffect("SELECT * FROM Personne")
     if session.get('error') is not None :
-        return render_template("index.html", error=session['error'])
+        flash(session['error'])
+        return render_template("index.html")
     if session.get('sondage') is not None :
-        message = session['sondage']
-        session.clear()
-        return render_template("index.html", error=message)
+        flash(session['sondage'])
+        return render_template("index.html")
 
     return render_template("index.html")
 
@@ -43,9 +43,9 @@ def inscription() :
             return redirect(url_for('sondage.index'))
         else :
             session['error']=error
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
     else :
         if session.permanent is False :
             session['error']=error2
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
     return redirect(url_for('index'))
